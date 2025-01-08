@@ -1,0 +1,101 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: optioj-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./mysql/init:/docker-entrypoint-initdb.d
+    ports:
+      - "3306:3306"
+    networks:
+      - optioj-network
+    restart: unless-stopped
+    command: --default-authentication-plugin=mysql_native_password
+
+  redis:
+    image: redis:alpine
+    container_name: optioj-redis
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - redis-data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - optioj-network
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: optioj-backend
+    environment:
+      - MYSQL_HOST=mysql
+      - MYSQL_PORT=3306
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    ports:
+      - "2550:2550"
+    networks:
+      - optioj-network
+    depends_on:
+      - mysql
+      - redis
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        - NEXT_PUBLIC_API_ENDPOINT=${NEXT_PUBLIC_API_ENDPOINT}
+        - NEXT_PUBLIC_GIT_SHA=${NEXT_PUBLIC_GIT_SHA}
+    container_name: optioj-frontend
+    ports:
+      - "3000:3000"
+    networks:
+      - optioj-network
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  judge:
+    build:
+      context: ./judge
+      dockerfile: Dockerfile
+    container_name: optioj-judge
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    volumes:
+      - judge-temp:/workspace/opti-neko/temp
+      - judge-submissions:/workspace/opti-neko/submissions
+      - judge-testcases:/workspace/opti-neko/testcases
+    networks:
+      - optioj-network
+    depends_on:
+      - backend
+      - redis
+    restart: unless-stopped
+
+networks:
+  optioj-network:
+    name: optioj-network
+    driver: bridge
+
+volumes:
+  mysql-data:
+  redis-data:
+  judge-temp:
+  judge-submissions:
+  judge-testcases:
