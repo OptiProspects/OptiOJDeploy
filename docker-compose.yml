@@ -34,6 +34,8 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     container_name: optioj-backend
+    volumes:
+      - ./backend:/opt/OptiOJDeploy/backend
     environment:
       - MYSQL_HOST=mysql
       - MYSQL_PORT=3306
@@ -60,6 +62,8 @@ services:
         - NEXT_PUBLIC_API_ENDPOINT=${NEXT_PUBLIC_API_ENDPOINT}
         - NEXT_PUBLIC_GIT_SHA=${NEXT_PUBLIC_GIT_SHA}
     container_name: optioj-frontend
+    volumes:
+      - ./frontend:/opt/OptiOJDeploy/frontend
     ports:
       - "3000:3000"
     networks:
