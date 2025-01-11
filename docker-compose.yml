@@ -32,6 +32,10 @@ services:
   backend:
     image: weatheringocean/optioj:latest
     container_name: optioj-backend
+    volumes:
+      - ./config.toml:/OptiOJ/config.toml
+      - ./jwtKey:/OptiOJ/jwtKey
+      - backend-data:/OptiOJ/data
     environment:
       - MYSQL_HOST=mysql
       - MYSQL_PORT=3306
@@ -118,3 +122,9 @@ volumes:
       type: none
       o: bind
       device: ${PWD}/data/judge/testcases
+  backend-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${PWD}/data/backend
