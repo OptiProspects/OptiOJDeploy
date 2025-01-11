@@ -1,4 +1,17 @@
 services:
+  init-volumes:
+    image: busybox
+    command: >
+      sh -c "mkdir -p /init/data/mysql &&
+             mkdir -p /init/data/redis &&
+             mkdir -p /init/data/judge/temp &&
+             mkdir -p /init/data/judge/submissions &&
+             mkdir -p /init/data/judge/testcases &&
+             mkdir -p /init/mysql/init &&
+             chown -R 999:999 /init/data/mysql"
+    volumes:
+      - ${PWD}:/init
+
   mysql:
     image: mysql:8.0
     container_name: optioj-mysql
@@ -14,6 +27,8 @@ services:
       - "3306:3306"
     networks:
       - optioj-network
+    depends_on:
+      - init-volumes
     restart: unless-stopped
     command: --default-authentication-plugin=mysql_native_password
 
