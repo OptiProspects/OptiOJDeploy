@@ -12,6 +12,21 @@ services:
     volumes:
       - ${PWD}:/init
 
+  redis:
+    image: redis:alpine
+    container_name: optioj-redis
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - redis-data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - optioj-network
+    depends_on:
+      init-volumes:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
   mysql:
     image: mysql:8.0
     container_name: optioj-mysql
@@ -28,21 +43,10 @@ services:
     networks:
       - optioj-network
     depends_on:
-      - init-volumes
+      init-volumes:
+        condition: service_completed_successfully
     restart: unless-stopped
     command: --default-authentication-plugin=mysql_native_password
-
-  redis:
-    image: redis:alpine
-    container_name: optioj-redis
-    command: redis-server --requirepass ${REDIS_PASSWORD}
-    volumes:
-      - redis-data:/data
-    ports:
-      - "6379:6379"
-    networks:
-      - optioj-network
-    restart: unless-stopped
 
   backend:
     image: weatheringocean/optioj:latest
