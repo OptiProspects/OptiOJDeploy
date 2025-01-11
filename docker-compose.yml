@@ -30,12 +30,8 @@ services:
     restart: unless-stopped
 
   backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
+    image: weatheringocean/optioj:latest
     container_name: optioj-backend
-    volumes:
-      - ./backend:/opt/OptiOJDeploy/backend
     environment:
       - MYSQL_HOST=mysql
       - MYSQL_PORT=3306
@@ -55,15 +51,11 @@ services:
     restart: unless-stopped
 
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-      args:
-        - NEXT_PUBLIC_API_ENDPOINT=${NEXT_PUBLIC_API_ENDPOINT}
-        - NEXT_PUBLIC_GIT_SHA=${NEXT_PUBLIC_GIT_SHA}
-    container_name: optioj-frontend
-    volumes:
-      - ./frontend:/opt/OptiOJDeploy/frontend
+    image: weatheringocean/optiojprovider:latest
+    container_name: optiojprovider
+    environment:
+      - NEXT_PUBLIC_API_ENDPOINT=${NEXT_PUBLIC_API_ENDPOINT}
+      - NEXT_PUBLIC_GIT_SHA=${NEXT_PUBLIC_GIT_SHA}
     ports:
       - "3000:3000"
     networks:
@@ -73,9 +65,7 @@ services:
     restart: unless-stopped
 
   judge:
-    build:
-      context: ./judge
-      dockerfile: Dockerfile
+    image: weatheringocean/optiojneko:latest
     container_name: optioj-judge
     environment:
       - REDIS_HOST=redis
@@ -99,7 +89,32 @@ networks:
 
 volumes:
   mysql-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${PWD}/data/mysql
   redis-data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${PWD}/data/redis
   judge-temp:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${PWD}/data/judge/temp
   judge-submissions:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${PWD}/data/judge/submissions
   judge-testcases:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${PWD}/data/judge/testcases
