@@ -34,7 +34,9 @@ services:
     container_name: optioj-backend
     volumes:
       - ./config.toml:/OptiOJ/config.toml
-      - ./jwtKey:/OptiOJ/jwtKey
+      - type: bind
+        source: ./jwtKey
+        target: /OptiOJ/jwtKey
       - backend-data:/OptiOJ/data
     environment:
       - MYSQL_HOST=mysql
