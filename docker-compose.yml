@@ -59,9 +59,10 @@ services:
   frontend:
     image: weatheringocean/optiojprovider:latest
     container_name: optiojprovider
+    volumes:
+      - ./.env:/app/.env
     environment:
       - NEXT_PUBLIC_API_ENDPOINT=${NEXT_PUBLIC_API_ENDPOINT}
-      - NEXT_PUBLIC_GIT_SHA=${NEXT_PUBLIC_GIT_SHA}
     ports:
       - "3000:3000"
     networks:
