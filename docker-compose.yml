@@ -63,6 +63,7 @@ services:
       - ./.env:/app/.env
     environment:
       - NEXT_PUBLIC_API_ENDPOINT=${NEXT_PUBLIC_API_ENDPOINT}
+      - NEXT_PUBLIC_ALLOWED_ORIGINS=${NEXT_PUBLIC_ALLOWED_ORIGINS}
     ports:
       - "3000:3000"
     networks:
